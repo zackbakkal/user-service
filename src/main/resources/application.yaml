@@ -1,5 +1,6 @@
 server:
   port: 9001
+
 spring:
   jpa:
     properties:
@@ -20,3 +21,14 @@ spring:
     resources:
       static-locations[0]: file:src/main/resources/static/
       static-locations[1]: classpath:/static/
+  application:
+    name: USER-SERVICE
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    hostname: localhost
