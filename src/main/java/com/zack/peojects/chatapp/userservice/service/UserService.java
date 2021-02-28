@@ -9,8 +9,6 @@ import com.zack.peojects.chatapp.userservice.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -81,27 +79,35 @@ public class UserService {
     }
 
     public UserResponseTemplate getUser(String username) throws UserNameNotFoundException {
-        UserResponseTemplate userResponseTemplate;
 
         log.info(String.format("Retrieving user [%s]", username));
-        return userRepository.findUserByUsername(username);
+        UserResponseTemplate userResponseTemplate = userRepository.findUserByUsername(username);
+
+        if(userResponseTemplate != null) {
+            return userResponseTemplate;
+        }
+
+        throw new UserNameNotFoundException(String.format("Username [%s] does not exist", username));
     }
 
 
-    public boolean setUserOnline(String username) throws UserNameNotFoundException {
+    public boolean setUserOnline(String username) {
         log.info(String.format("Updating user [%s] online status to online", username));
         return userRepository.updateUserOnlineStatus(username, true) == 1;
     }
 
-    public boolean setUserOffline(String username) throws UserNameNotFoundException {
+    public boolean setUserOffline(String username) {
         log.info(String.format("Updating user [%s] online status to offline", username));
         return userRepository.updateUserOnlineStatus(username, false) == 1;
     }
 
-    public boolean setUserAvailability(String username, String availability) throws UserNameNotFoundException {
+    public boolean setUserAvailability(String username, String availability) {
         log.info(String.format("Updating user [%s] availability to [%s]", username, availability));
         return userRepository.updateUserAvailability(username, availability) == 1;
     }
 
-
+    public boolean userIsRegistered(String username) {
+        log.info(String.format("Checking if user [%s] is registered", username));
+        return userRepository.findUserByUsername(username) != null;
+    }
 }
