@@ -12,7 +12,7 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/chatapp
     username: chatappuser
-    password: Education1
+    password: 
     driverClassName: org.postgresql.Driver
   devtools:
     restart:
@@ -21,14 +21,4 @@ spring:
     resources:
       static-locations[0]: file:src/main/resources/static/
       static-locations[1]: classpath:/static/
-  application:
-    name: USER-SERVICE
 
-eureka:
-  client:
-    register-with-eureka: true
-    fetch-registry: true
-    service-url:
-      defaultZone: http://localhost:8761/eureka/
-  instance:
-    hostname: localhost
