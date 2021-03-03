@@ -20,6 +20,7 @@ public class UserResponseTemplate {
     private boolean isCredentialsNonExpired;
     private boolean isEnabled;
     private String availability;
+    private String profileImageUrl;
 
     public UserResponseTemplate(User user) {
         this.username = user.getUsername();

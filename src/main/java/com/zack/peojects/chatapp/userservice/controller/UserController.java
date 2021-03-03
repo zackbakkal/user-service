@@ -17,9 +17,9 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @PostMapping("/register")
-    public UserResponseTemplate registerUser(@RequestBody UserRequestTemplate userRequestTemplate) throws UserNameExistsException {
-        return userService.registerUser(userRequestTemplate);
+    @GetMapping("/alive")
+    public String alive() {
+        return "USER-SERVICE: (ok)";
     }
 
     @GetMapping("/all")
@@ -51,6 +51,11 @@ public class UserController {
     @GetMapping("/registered/{username}")
     public boolean userIsRegistered(@PathVariable String username) {
         return userService.userIsRegistered(username);
+    }
+
+    @GetMapping("/startwith/{username}")
+    public List<UserResponseTemplate> searchUsersStartWith(@PathVariable String username) {
+        return userService.searchUsersStartWith(username);
     }
 
 }
