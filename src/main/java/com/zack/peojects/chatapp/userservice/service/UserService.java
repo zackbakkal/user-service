@@ -9,6 +9,7 @@ import com.zack.peojects.chatapp.userservice.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,48 +22,8 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
-    public UserResponseTemplate registerUser(UserRequestTemplate userRequestTemplate) throws UserNameExistsException {
-        log.info(String.format("Checking if username [%s] already exists", userRequestTemplate.getUsername()));
-        boolean userNameExists = userRepository.existsById(userRequestTemplate.getUsername());
-
-        if(userNameExists) {
-            log.info(String.format("username [%s] is taken", userRequestTemplate.getUsername()));
-            throw new UserNameExistsException(
-                    String.format("Username [%s] is taken, please try a different username", userRequestTemplate.getUsername()));
-        }
-
-        log.info(String.format("username [%s] is available: ", userRequestTemplate.getUsername()));
-        User user = new User();
-
-        log.info("Encoding password");
-        user.setPassword(userRequestTemplate.getPassword());
-
-        log.info("Activating user account");
-        activateUserAccount(user);
-
-        log.info("Initializing user availability to available");
-        initializeUserAvailability(user);
-
-        log.info(String.format("Registering user: [%s]", user));
-        userRepository.save(user);
-
-        log.info(String.format("Creating response"));
-        UserResponseTemplate userResponseTemplate = new UserResponseTemplate(user);
-
-        return userResponseTemplate;
-    }
-
-    private void activateUserAccount(User user) {
-        log.info(String.format("Activating User [%s] account", user));
-        user.setAccountNonExpired(true);
-        user.setAccountNonLocked(true);
-        user.setCredentialsNonExpired(true);
-        user.setEnabled(true);
-    }
-
-    private void initializeUserAvailability(User user) {
-        user.setAvailability("available");
-    }
+    @Autowired
+    private RestTemplate restTemplate;
 
     public List<UserResponseTemplate> getAllUsers() {
         List<UserResponseTemplate> userResponseTemplates = new ArrayList<>();
@@ -103,11 +64,27 @@ public class UserService {
 
     public boolean setUserAvailability(String username, String availability) {
         log.info(String.format("Updating user [%s] availability to [%s]", username, availability));
-        return userRepository.updateUserAvailability(username, availability) == 1;
+        boolean availabilityChanged = userRepository.updateUserAvailability(username, availability) == 1;
+        if(availabilityChanged) {
+            restTemplate.put(
+                    "http://NOTIFICATION-SERVICE/notifications/notifyUsers/" + username,
+                    null,
+                    Boolean.class);
+        }
+
+        return availabilityChanged;
     }
 
     public boolean userIsRegistered(String username) {
         log.info(String.format("Checking if user [%s] is registered", username));
         return userRepository.findUserByUsername(username) != null;
     }
+
+    public List<UserResponseTemplate> searchUsersStartWith(String username) {
+
+        log.info((String.format("Searching username [%s]", username)));
+        return userRepository.findByUsernameStartingWith(username);
+
+    }
+
 }
